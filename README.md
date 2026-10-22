@@ -3,6 +3,15 @@
 Курсовая работа по дисциплине «Объектно-ориентированное программирование».
 **Этап 1**: консольное приложение, которое опрашивает несколько открытых API, приводит ответы к единой модели и сохраняет их в файл (JSON или CSV), а также умеет читать данные обратно.
 
+## 💻 Используемые технологии
+
+- **Java 17** (включая `java.time` и `java.net.http.HttpClient`)
+- **Maven** (система сборки)
+- **Jackson** (библиотека для парсинга и работы с JSON)
+- **Apache Commons CSV** (работа с CSV-файлами)
+- **SLF4J + Logback** (логирование)
+- **Java NIO** (работа с файловой системой: `Files`, `Path`)
+
 ## 🌐 Выбранные API
 
 В проекте используются три открытых API, не требующих ключей авторизации:
@@ -10,15 +19,12 @@
 1. **Open-Meteo** (`open-meteo`)
     - *Категория:* weather
     - *Описание:* Погода. Возвращает текущую температуру, скорость ветра и почасовой прогноз.
-    - *Документация:* [https://open-meteo.com/en/docs](https://open-meteo.com/en/docs)
 2. **Open Library** (`open-library`)
     - *Категория:* book
     - *Описание:* Библиотека книг. Поиск по названию, возвращает авторов, год издания и теги.
-    - *Документация:* [https://openlibrary.org/developers/api](https://openlibrary.org/developers/api)
 3. **World Bank** (`world-bank`)
     - *Категория:* country
     - *Описание:* Данные Всемирного банка о странах. Возвращает столицу, регион, уровень дохода и координаты.
-    - *Документация:* [https://datahelpdesk.worldbank.org/knowledgebase/articles/898581](https://datahelpdesk.worldbank.org/knowledgebase/articles/898581)
 
 Все API удовлетворяют требованиям задания: JSON-ответ, минимум 5 полей, наличие вложенных объектов/массивов, поддержка query-параметров, данные зависят от параметров.
 
@@ -59,18 +65,17 @@ mvn exec:java -Dexec.args="help"
 
 ## Архитектура и формат
 
-### 🏗 Архитектура проекта
-Проект построен по принципам ООП и SOLID. Слои разделены по пакетам:
-```text
-com.example.aggregator
-├── aggregation/ # Бизнес-логика (оркестратор Aggregator)
-├── cli/ # Консольный интерфейс (парсинг аргументов, вывод)
-├── config/ # Сборка объектов (AppConfig — Composition Root)
-├── http/ # HTTP-клиент (интерфейс HttpClientWrapper и реализация)
-├── model/ # Единая модель данных (AggregatedData, WriteMode)
-├── source/ # Источники API (интерфейс DataSource, AbstractDataSource и реализации)
-└── storage/ # Хранилище (интерфейс DataStorage, JsonDataStorage, CsvDataStorage, Factory)
-```
+### Архитектура проекта
+
+Проект разделен на слои для соблюдения принципов ООП и разделения ответственности:
+
+- `cli` — консольный интерфейс (парсинг аргументов `CommandParser`, обработка команд `CommandLineApp`, модель команды `Command`).
+- `aggregation` — бизнес-логика (оркестратор `Aggregator`, который опрашивает источники и передает данные в хранилище).
+- `source` — источники данных (интерфейс `DataSource`, базовый класс `AbstractDataSource` и реализации для каждого API).
+- `http` — работа с сетью (интерфейс `HttpClientWrapper` и его реализация `JavaHttpClientWrapper`).
+- `storage` — хранилище (интерфейс `DataStorage`, реализации `JsonDataStorage`, `CsvDataStorage` и `StorageFactory`).
+- `model` — единая модель данных (`AggregatedData`, `WriteMode`).
+- `config` — сборка объектов (класс `AppConfig` — Composition Root).
 
 ### Ключевые особенности:
 - **Единая модель:** Все ответы API приводятся к классу `AggregatedData`.
