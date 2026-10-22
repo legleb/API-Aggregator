@@ -102,7 +102,7 @@ com.example.aggregator
 }
 ```
 
-#### Пример 2: Книги (Open Library)1
+#### Пример 2: Книги (Open Library)
 ```json
 {
   "source": "open-library",
