@@ -83,7 +83,8 @@ com.example.aggregator
 
 ## 📊 Формат данных
 
-Каждая запись в JSON/CSV имеет единую структуру:
+Каждая запись в JSON/CSV имеет единую структуру. Поле `fields` гибко хранит любые данные: числа, строки, вложенные объекты и массивы (в зависимости от источника). 
+#### **Пример 1: Погода (Open-Meteo)**
 ```json
 {
   "source": "open-meteo",
@@ -92,7 +93,44 @@ com.example.aggregator
   "timestamp": "2026-10-22T18:53:21Z",
   "fields": {
     "temperature": 7.0,
-    "windspeed": 6.4
+    "windspeed": 6.4,
+    "hourly": [
+      { "time": "2026-10-22T00:00", "temp": 5.3 },
+      { "time": "2026-10-22T01:00", "temp": 5.1 }
+    ]
+  }
+}
+```
+
+#### Пример 2: Книги (Open Library)
+```json
+{
+  "source": "open-library",
+  "category": "book",
+  "key": "java - Head first Java",
+  "timestamp": "2026-10-22T18:53:21Z",
+  "fields": {
+    "title": "Head first Java",
+    "first_publish_year": 2003,
+    "author_name": [ "Kathy Sierra" ]
+  }
+}
+```
+
+#### Пример 3: Страны (World Bank)
+```json
+{
+  "source": "world-bank",
+  "category": "country",
+  "key": "RUS",
+  "timestamp": "2026-10-22T18:53:21Z",
+  "fields": {
+    "name": "Russian Federation",
+    "capitalCity": "Moscow",
+    "region": {
+      "id": "ECS",
+      "value": "Europe & Central Asia"
+    }
   }
 }
 ```
