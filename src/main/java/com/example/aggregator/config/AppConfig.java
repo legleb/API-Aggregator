@@ -26,6 +26,6 @@ public final class AppConfig {
 
         CommandParser parser = new CommandParser();
 
-        return new CommandLineApp(registry, mapper, parser);
+        return new CommandLineApp(registry, parser);
     }
 }

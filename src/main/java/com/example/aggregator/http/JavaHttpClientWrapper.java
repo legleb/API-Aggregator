@@ -11,13 +11,13 @@ public class JavaHttpClientWrapper implements HttpClientWrapper {
     private final HttpClient client;
 
     public JavaHttpClientWrapper() {
-        this.client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10))
+        this.client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30))
                 .followRedirects(HttpClient.Redirect.NORMAL).build();
     }
 
     @Override
     public String get(String url) {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(15))
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(30))
                 .GET().header("Accept", "application/json")
                 .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
                         "AppleWebKit/537.36 (KHTML, like Gecko) " +

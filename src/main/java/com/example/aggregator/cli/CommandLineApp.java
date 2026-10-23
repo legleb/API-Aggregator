@@ -17,12 +17,10 @@ public class CommandLineApp {
     private static final Logger log = LoggerFactory.getLogger(CommandLineApp.class);
     private static final String DATA_DIR = "data";
     private final DataSourceRegistry registry;
-    private final ObjectMapper mapper;
     private final CommandParser parser;
 
-    public CommandLineApp(DataSourceRegistry registry, ObjectMapper mapper, CommandParser parser) {
+    public CommandLineApp(DataSourceRegistry registry, CommandParser parser) {
         this.registry = registry;
-        this.mapper = mapper;
         this.parser = parser;
     }
 
@@ -51,7 +49,7 @@ public class CommandLineApp {
     private void handlePoll(Command command) {
         String format = command.getFormat() != null ? command.getFormat() : "json";
         Path file = Path.of(DATA_DIR, "data." + format);
-        DataStorage storage = StorageFactory.create(format, file, mapper);
+        DataStorage storage = StorageFactory.create(format, file);
         Aggregator aggregator = new Aggregator(registry, storage);
 
         aggregator.poll(command.getSources(), command.getParamsBySource(), command.getMode());
@@ -68,7 +66,7 @@ public class CommandLineApp {
                 continue;
             }
             try {
-                DataStorage storage = StorageFactory.create(format, file, mapper);
+                DataStorage storage = StorageFactory.create(format, file);
                 List<AggregatedData> data = (sourceFilter == null) ? storage.read() : storage.readBySource(sourceFilter);
                 result.addAll(data);
             } catch (StorageException | IllegalArgumentException e) {
