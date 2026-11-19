@@ -8,7 +8,7 @@ public class StartPollingRequest {
     private Integer t;
     private String format;
     private String file;
-    private String mode; // <--- ДОБАВИЛИ
+    private String mode;
     private Map<String, List<Map<String, String>>> sources;
 
     public Integer getN() {

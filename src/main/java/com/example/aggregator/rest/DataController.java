@@ -19,10 +19,12 @@ import java.util.List;
 public class DataController {
     private final PollingScheduler scheduler;
     private final PollingConfig defaultConfig;
+    private final StorageFactory storageFactory;
 
-    public DataController(PollingScheduler scheduler, PollingConfig defaultConfig) {
+    public DataController(PollingScheduler scheduler, PollingConfig defaultConfig, StorageFactory storageFactory) {
         this.scheduler = scheduler;
         this.defaultConfig = defaultConfig;
+        this.storageFactory = storageFactory;
     }
 
     @GetMapping
@@ -35,7 +37,7 @@ public class DataController {
                 ? scheduler.getCurrentFile()
                 : defaultConfig.getFile();
 
-        DataStorage storage = StorageFactory.create(format, Path.of(file));
+        DataStorage storage = storageFactory.create(format, Path.of(file));
         List<AggregatedData> data = (source == null)
                 ? storage.read()
                 : storage.readBySource(source);

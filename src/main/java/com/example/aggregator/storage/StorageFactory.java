@@ -1,20 +1,22 @@
 package com.example.aggregator.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.stereotype.Component;
+
 import java.nio.file.Path;
 
-public final class StorageFactory {
-    public static DataStorage create(String format, Path file) {
+@Component
+public class StorageFactory {
+    private final ObjectMapper mapper;
+
+    public StorageFactory(ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    public DataStorage create(String format, Path file) {
         if (format == null) {
             throw new IllegalArgumentException("Format is null");
         }
-
-        ObjectMapper mapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
         return switch (format.toLowerCase()) {
             case "json" -> new JsonDataStorage(file, mapper);
             case "csv"  -> new CsvDataStorage(file, mapper);

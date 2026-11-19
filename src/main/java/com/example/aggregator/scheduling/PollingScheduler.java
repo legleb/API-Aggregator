@@ -22,13 +22,15 @@ import java.util.concurrent.TimeUnit;
 public class PollingScheduler {
     private static final Logger log = LoggerFactory.getLogger(PollingScheduler.class);
     private final DataSourceRegistry registry;
+    private final StorageFactory storageFactory;
     private ScheduledExecutorService executor;
     private boolean isRunning = false;
     private String currentFormat;
     private String currentFile;
 
-    public PollingScheduler(DataSourceRegistry registry) {
+    public PollingScheduler(DataSourceRegistry registry, StorageFactory storageFactory) {
         this.registry = registry;
+        this.storageFactory = storageFactory;
     }
 
     public synchronized void start(PollingConfig config) {
@@ -41,7 +43,7 @@ public class PollingScheduler {
         this.currentFormat = config.getFormat();
         this.currentFile = config.getFile();
 
-        DataStorage storage = StorageFactory.create(
+        DataStorage storage = storageFactory.create(
                 config.getFormat(),
                 Path.of(config.getFile())
         );

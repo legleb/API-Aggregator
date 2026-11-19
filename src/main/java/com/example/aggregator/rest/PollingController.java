@@ -44,6 +44,12 @@ public class PollingController {
                 configToRun.setMode(request.getMode() != null ? request.getMode() : defaultConfig.getMode()); // <--- ДОБАВИЛИ
                 configToRun.setSources(request.getSources() != null ? request.getSources() : defaultConfig.getSources());
             }
+            if (configToRun.getN() <= 0) {
+                throw new IllegalArgumentException("n must be positive");
+            }
+            if (configToRun.getT() <= 0) {
+                throw new IllegalArgumentException("t must be positive");
+            }
             scheduler.start(configToRun);
             return ResponseEntity.ok(new MessageResponse("Polling started"));
         } catch (IllegalArgumentException | IllegalStateException e) {

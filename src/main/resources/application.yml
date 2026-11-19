@@ -4,8 +4,8 @@ server:
 aggregator:
   n: 3
   t: 10
-  format: csv
-  file: data/data.csv
+  format: json
+  file: data/data.json
   mode: create
 
   sources:
