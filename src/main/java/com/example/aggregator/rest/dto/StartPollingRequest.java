@@ -1,5 +1,7 @@
 package com.example.aggregator.rest.dto;
 
+import com.example.aggregator.model.WriteMode;
+
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +10,7 @@ public class StartPollingRequest {
     private Integer t;
     private String format;
     private String file;
-    private String mode;
+    private WriteMode mode;
     private Map<String, List<Map<String, String>>> sources;
 
     public Integer getN() {
@@ -43,11 +45,11 @@ public class StartPollingRequest {
         this.file = file;
     }
 
-    public String getMode() {
+    public WriteMode getMode() {
         return mode;
     }
 
-    public void setMode(String mode) {
+    public void setMode(WriteMode mode) {
         this.mode = mode;
     }
 

@@ -1,5 +1,6 @@
 package com.example.aggregator.scheduling;
 
+import com.example.aggregator.model.WriteMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,7 @@ public class PollingConfig {
     private int t;
     private String format;
     private String file;
-    private String mode;
+    private WriteMode mode;
     private Map<String, List<Map<String, String>>> sources;
 
     public int getN() {
@@ -48,11 +49,11 @@ public class PollingConfig {
         this.file = file;
     }
 
-    public String getMode() {
+    public WriteMode getMode() {
         return mode;
     }
 
-    public void setMode(String mode) {
+    public void setMode(WriteMode mode) {
         this.mode = mode;
     }
 

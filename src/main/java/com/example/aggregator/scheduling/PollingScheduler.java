@@ -50,7 +50,7 @@ public class PollingScheduler {
                 Path.of(config.getFile())
         );
 
-        if ("create".equalsIgnoreCase(config.getMode())) {
+        if (config.getMode() == WriteMode.CREATE) {
             log.info("Clearing file before start (mode=create)");
             storage.write(List.of(), WriteMode.CREATE);
         }

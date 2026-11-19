@@ -1,5 +1,6 @@
 package com.example.aggregator.scheduling;
 
+import com.example.aggregator.model.WriteMode;
 import com.example.aggregator.source.DataSource;
 import com.example.aggregator.source.DataSourceRegistry;
 import com.example.aggregator.storage.StorageFactory;
@@ -38,7 +39,7 @@ class PollingSchedulerTest {
         config.setT(1);
         config.setFormat("json");
         config.setFile("target/t.json");
-        config.setMode("create");
+        config.setMode(WriteMode.CREATE);
         config.setSources(Map.of("mock", List.of(Map.of("k", "v"))));
 
         scheduler.start(config);
@@ -58,7 +59,7 @@ class PollingSchedulerTest {
         config.setT(1);
         config.setFormat("json");
         config.setFile("target/t.json");
-        config.setMode("create");
+        config.setMode(WriteMode.CREATE);
         config.setSources(Map.of());
 
         scheduler.start(config);

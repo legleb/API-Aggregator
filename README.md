@@ -101,7 +101,7 @@ curl -X POST http://localhost:8080/polling/start \
     "t": 5,
     "format": "csv",
     "file": "data/custom.csv",
-    "mode": "create",
+    "mode": CREATE,
     "sources": {
       "open-meteo": [
         { "latitude": "51.5074", "longitude": "-0.1278" }
@@ -157,9 +157,14 @@ curl http://localhost:8080/polling/status
 
 ```json
 {
-"running": true,
-"n": 3,
-"t": 10
+   "running": true,
+   "n": 3,
+   "t": 10,
+   "activeSources": [
+      "open-meteo",
+      "open-library",
+      "world-bank"
+   ]   
 }
 ```
 running — запущен ли опрос.  
@@ -188,15 +193,15 @@ curl http://localhost:8080/data?source=open-meteo
 
 ```json
 {
-    "source": "open-meteo",
-    "category": "weather",
-    "key": "55.75,37.61",
-    "timestamp": "2026-11-17T17:50:00Z",
-    "fields": {
-      "temperature": -0.2,
-      "windspeed": 12.7
-    }
-  }
+   "source": "open-meteo",
+   "category": "weather",
+   "key": "55.75,37.61",
+   "timestamp": "2026-11-17T17:50:00Z",
+   "fields": {
+   "temperature": -0.2,
+   "windspeed": 12.7
+   }
+}
 ```
 
 ---
@@ -207,50 +212,50 @@ curl http://localhost:8080/data?source=open-meteo
 #### **Пример 1: Погода (Open-Meteo)**
 ```json
 {
-  "source": "open-meteo",
-  "category": "weather",
-  "key": "55.75,37.61",
-  "timestamp": "2026-10-22T18:53:21Z",
-  "fields": {
-    "temperature": 7.0,
-    "windspeed": 6.4,
-    "hourly": [
-      { "time": "2026-10-22T00:00", "temp": 5.3 },
-      { "time": "2026-10-22T01:00", "temp": 5.1 }
-    ]
-  }
+   "source": "open-meteo",
+   "category": "weather",
+   "key": "55.75,37.61",
+   "timestamp": "2026-10-22T18:53:21Z",
+   "fields": {
+      "temperature": 7.0,
+      "windspeed": 6.4,
+      "hourly": [
+         { "time": "2026-10-22T00:00", "temp": 5.3 },
+         { "time": "2026-10-22T01:00", "temp": 5.1 }
+      ]
+   }
 }
 ```
 
 #### Пример 2: Книги (Open Library)
 ```json
 {
-  "source": "open-library",
-  "category": "book",
-  "key": "java - Head first Java",
-  "timestamp": "2026-10-22T18:53:21Z",
-  "fields": {
+   "source": "open-library",
+   "category": "book",
+   "key": "java - Head first Java",
+   "timestamp": "2026-10-22T18:53:21Z",
+   "fields": {
     "title": "Head first Java",
     "first_publish_year": 2003,
     "author_name": [ "Kathy Sierra" ]
-  }
+   }
 }
 ```
 
 #### Пример 3: Страны (World Bank)
 ```json
 {
-  "source": "world-bank",
-  "category": "country",
-  "key": "RUS",
-  "timestamp": "2026-10-22T18:53:21Z",
-  "fields": {
-    "name": "Russian Federation",
-    "capitalCity": "Moscow",
-    "region": {
+   "source": "world-bank",
+   "category": "country",
+   "key": "RUS",
+   "timestamp": "2026-10-22T18:53:21Z",
+   "fields": {
+      "name": "Russian Federation",
+      "capitalCity": "Moscow",
+      "region": {
       "id": "ECS",
       "value": "Europe & Central Asia"
-    }
-  }
+      }
+   }
 }
 ```

@@ -6,7 +6,7 @@ aggregator:
   t: 10
   format: json
   file: data/data.json
-  mode: create
+  mode: CREATE
 
   sources:
     open-meteo:
