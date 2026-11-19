@@ -51,4 +51,21 @@ class OpenMeteoSourceTest {
 
         assertThrows(DataSourceException.class, () -> source.fetch(Map.of()));
     }
+
+    @Test
+    void testFetchMinimalJson() {
+        HttpClientWrapper http = mock(HttpClientWrapper.class);
+        String minimalJson = """
+            {
+              "latitude": 52.52,
+              "longitude": 13.41,
+              "timezone": "Europe/Berlin"
+            }
+            """;
+        when(http.get(anyString())).thenReturn(minimalJson);
+        OpenMeteoSource source = new OpenMeteoSource(http, new ObjectMapper());
+        List<AggregatedData> result = source.fetch(Map.of("latitude", "52.52", "longitude", "13.41"));
+        assertEquals(1, result.size());
+        assertEquals(52.52, result.get(0).getFields().get("latitude"));
+    }
 }

@@ -57,4 +57,17 @@ class DataControllerTest {
 
         mockMvc.perform(get("/data?source=open-meteo")).andExpect(status().isOk());
     }
+
+    @Test
+    void testGetDataFallbackToDefaultConfig() throws Exception {
+        DataStorage storageMock = mock(DataStorage.class);
+        when(storageMock.read()).thenReturn(List.of());
+        when(storageFactory.create(anyString(), any())).thenReturn(storageMock);
+        when(scheduler.getCurrentFormat()).thenReturn(null);
+        when(scheduler.getCurrentFile()).thenReturn(null);
+        when(defaultConfig.getFormat()).thenReturn("json");
+        when(defaultConfig.getFile()).thenReturn("data/data.json");
+
+        mockMvc.perform(get("/data")).andExpect(status().isOk());
+    }
 }

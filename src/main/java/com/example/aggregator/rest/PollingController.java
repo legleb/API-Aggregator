@@ -75,11 +75,9 @@ public class PollingController {
 
     @GetMapping("/status")
     public ResponseEntity<PollingStatusResponse> status() {
-        return ResponseEntity.ok(new PollingStatusResponse(
-                scheduler.isRunning(),
-                defaultConfig.getN(),
-                defaultConfig.getT(),
-                scheduler.getActiveSources()
-        ));
+        boolean running = scheduler.isRunning();
+        int n = running ? scheduler.getCurrentN() : defaultConfig.getN();
+        int t = running ? scheduler.getCurrentT() : defaultConfig.getT();
+        return ResponseEntity.ok(new PollingStatusResponse(running, n, t, scheduler.getActiveSources()));
     }
 }

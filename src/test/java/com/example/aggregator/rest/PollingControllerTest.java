@@ -1,5 +1,6 @@
 package com.example.aggregator.rest;
 
+import com.example.aggregator.model.WriteMode;
 import com.example.aggregator.scheduling.PollingConfig;
 import com.example.aggregator.scheduling.PollingScheduler;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Map;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -62,13 +66,13 @@ class PollingControllerTest {
     @Test
     void testStatus() throws Exception {
         when(scheduler.isRunning()).thenReturn(true);
-        when(defaultConfig.getN()).thenReturn(3);
-        when(defaultConfig.getT()).thenReturn(10);
+        when(scheduler.getCurrentN()).thenReturn(5);
+        when(scheduler.getCurrentT()).thenReturn(20);
         mockMvc.perform(get("/polling/status"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.running").value(true))
-                .andExpect(jsonPath("$.n").value(3))
-                .andExpect(jsonPath("$.t").value(10))
+                .andExpect(jsonPath("$.n").value(5))
+                .andExpect(jsonPath("$.t").value(20))
                 .andExpect(jsonPath("$.activeSources").isArray());
     }
 
@@ -81,5 +85,21 @@ class PollingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"n\": 0}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testStartWithNullRequest() throws Exception {
+        when(scheduler.isRunning()).thenReturn(false);
+        when(defaultConfig.getN()).thenReturn(3);
+        when(defaultConfig.getT()).thenReturn(10);
+        when(defaultConfig.getFormat()).thenReturn("json");
+        when(defaultConfig.getFile()).thenReturn("data/data.json");
+        when(defaultConfig.getMode()).thenReturn(WriteMode.CREATE);
+        when(defaultConfig.getSources()).thenReturn(Map.of());
+
+        mockMvc.perform(post("/polling/start")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Polling started"));
     }
 }
