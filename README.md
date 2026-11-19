@@ -1,15 +1,18 @@
-# Агрегатор данных из REST API (Этап 1)
+# Агрегатор данных из REST API (Этап 2)
 
 Курсовая работа по дисциплине «Объектно-ориентированное программирование».
-**Этап 1**: консольное приложение, которое опрашивает несколько открытых API, приводит ответы к единой модели и сохраняет их в файл (JSON или CSV), а также умеет читать данные обратно.
+**Этап 2**: Spring Boot приложение, которое параллельно опрашивает несколько открытых REST API, приводит ответы к единой модели, сохраняет их в файл (JSON или CSV) и управляется через собственный REST API.
 
 ## Используемые технологии
 
 - **Java 17** (включая `java.time` и `java.net.http.HttpClient`)
+- **Spring Boot 3.3.2** (REST API, DI, конфигурация)
 - **Maven** (система сборки)
 - **Jackson** (библиотека для парсинга и работы с JSON)
 - **Apache Commons CSV** (работа с CSV-файлами)
 - **SLF4J + Logback** (логирование)
+- **JUnit 5 + Mockito** (тестирование)
+- **JaCoCo** (покрытие кода тестами ≥ 70%)
 - **Java NIO** (работа с файловой системой: `Files`, `Path`)
 
 ## Выбранные API
@@ -30,7 +33,32 @@
 
 ---
 
-## Сборка и запуск
+## Архитектура и формат
+
+### Архитектура проекта
+
+Проект разделен на слои для соблюдения принципов ООП и разделения ответственности:
+
+- `source` — источники данных (интерфейс `DataSource`, базовый класс `AbstractDataSource` и реализации для каждого API).
+- `http` — работа с сетью (интерфейс `HttpClientWrapper` и его реализация `JavaHttpClientWrapper`).
+- `storage` — хранилище (интерфейс `DataStorage`, реализации `JsonDataStorage`, `CsvDataStorage` и `StorageFactory`).
+- `model` — единая модель данных (`AggregatedData`, `WriteMode`).
+- `scheduling` — многопоточность (`PollingScheduler`, `PollingTask`, `PollingConfig`).
+- `rest` — REST API (`PollingController`, `DataController`, DTO).
+- `config` — сборка бинов (`AppConfig` — Composition Root).
+
+### Ключевые особенности:
+- **Единая модель:** Все ответы API приводятся к классу `AggregatedData`.
+- **Шаблонный метод (Template Method):** `AbstractDataSource` реализует общий скелет HTTP-запроса и парсинга JSON, оставляя наследникам только специфику API.
+- **Фабрики и реестры:** `StorageFactory` создаёт хранилище нужного формата, `DataSourceRegistry` хранит все доступные источники.
+- **Многопоточность:** пул потоков `Executors.newScheduledThreadPool(n)` опрашивает API параллельно.
+- **Отказоустойчивость:** падение одного источника не прерывает опрос остальных (Fault Tolerance).
+- **Тестирование:** покрытие JaCoCo ≥ 70%, MockMvc для контроллеров, Mockito для сетевых вызовов.
+- **Логирование:** Используется SLF4J + Logback.
+
+---
+
+## Сборка и тестирование
 
 ### Требования
 - Java 17+
@@ -41,48 +69,135 @@
 mvn clean compile
 ```
 
-### Запуск опроса (poll)
+### Тесты и проверка покрытия
 ```bash
-mvn exec:java -Dexec.args="poll --sources=<список> --format=<json|csv> --mode=<create|append>"
+mvn clean verify
 ```
+Запускает все тесты и проверяет, что покрытие ≥ 70% (иначе сборка упадёт).
+Отчёт JaCoCo: target/site/jacoco/index.html.
 
-### Чтение данных (print)
+### Запуск приложения
 ```bash
-# Вывести всё
-mvn exec:java -Dexec.args="print"
-
-# Вывести только данные от Open-Meteo
-mvn exec:java -Dexec.args="print --source=open-meteo"
+mvn spring-boot:run
 ```
-
-### Справка (help)
-```bash
-mvn exec:java -Dexec.args="help"
-```
-
 
 ---
 
-## Архитектура и формат
+## 🌐 REST API
 
-### Архитектура проекта
+Приложение предоставляет следующие эндпоинты для управления опросом и просмотра данных.
 
-Проект разделен на слои для соблюдения принципов ООП и разделения ответственности:
+### 1. Запуск опроса
+```bash
+POST /polling/start
+```
 
-- `cli` — консольный интерфейс (парсинг аргументов `CommandParser`, обработка команд `CommandLineApp`, модель команды `Command`).
-- `aggregation` — бизнес-логика (оркестратор `Aggregator`, который опрашивает источники и передает данные в хранилище).
-- `source` — источники данных (интерфейс `DataSource`, базовый класс `AbstractDataSource` и реализации для каждого API).
-- `http` — работа с сетью (интерфейс `HttpClientWrapper` и его реализация `JavaHttpClientWrapper`).
-- `storage` — хранилище (интерфейс `DataStorage`, реализации `JsonDataStorage`, `CsvDataStorage` и `StorageFactory`).
-- `model` — единая модель данных (`AggregatedData`, `WriteMode`).
-- `config` — сборка объектов (класс `AppConfig` — Composition Root).
+**Пример запроса (curl):**
+```bash
+curl -X POST http://localhost:8080/polling/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "n": 2,
+    "t": 5,
+    "format": "csv",
+    "file": "data/custom.csv",
+    "mode": "create",
+    "sources": {
+      "open-meteo": [
+        { "latitude": "51.5074", "longitude": "-0.1278" }
+      ],
+      "world-bank": [
+        { "code": "FRA" }
+      ]
+    }
+  }'
+```
 
-### Ключевые особенности:
-- **Единая модель:** Все ответы API приводятся к классу `AggregatedData`.
-- **Шаблонный метод (Template Method):** `AbstractDataSource` реализует общий скелет HTTP-запроса и парсинга JSON, оставляя наследникам только специфику API.
-- **Фабрики и реестры:** `StorageFactory` создаёт хранилище нужного формата, `DataSourceRegistry` хранит все доступные источники.
-- **Обработка ошибок:** Каждый слой имеет своё unchecked-исключение (`CliException`, `HttpClientException`, `DataSourceException`, `StorageException`). Сетевые вызовы и ошибки парсинга не прерывают опрос остальных источников (устойчивость к сбоям).
-- **Логирование:** Используется SLF4J + Logback.
+
+Запускает параллельный опрос источников. Все поля в теле запроса необязательны. Если поле не передано, используется значение по умолчанию из `application.yml`. Если для источника передан свой список параметров, он полностью заменяет набор из конфигурации.
+
+**Ответы:**
+
+- 200 OK — опрос успешно запущен. Тело: {"message": "Polling started"}
+- 409 Conflict — опрос уже запущен. Тело: {"message": "Polling is already running"}
+- 400 Bad Request — неверные параметры (например, n <= 0).
+
+### 2. Остановка опроса
+
+```bash
+POST /polling/stop
+```
+
+Останавливает текущий опрос, завершает потоки и освобождает ресурсы.
+
+**Пример запроса:**
+
+```bash
+curl -X POST http://localhost:8080/polling/stop
+```
+
+**Ответы:**
+- 200 OK — опрос остановлен. Тело: {"message": "Polling stopped"}
+- 400 Bad Request — опрос не был запущен. Тело: {"message": "Polling is not running"}
+
+### 3. Статус опроса
+
+```bash
+GET /polling/status
+```
+
+Возвращает текущий статус опроса.
+
+**Пример запроса:**
+
+```bash
+curl http://localhost:8080/polling/status
+```
+**Ответ (JSON):**
+
+```json
+{
+"running": true,
+"n": 3,
+"t": 10
+}
+```
+running — запущен ли опрос.  
+n — максимальное число одновременно выполняемых задач.  
+t — интервал опроса в секундах.
+
+### 4. Просмотр данных
+
+```bash
+GET /data
+```
+
+Возвращает содержимое файла с результатами последнего опроса. Поддерживает опциональный фильтр по источнику.
+
+**Пример запроса (все данные):**
+
+```bash
+curl http://localhost:8080/data
+```
+**Пример запроса (только Open-Meteo):**
+
+```bash
+curl http://localhost:8080/data?source=open-meteo
+```
+**Ответ (JSON):**
+
+```json
+{
+    "source": "open-meteo",
+    "category": "weather",
+    "key": "55.75,37.61",
+    "timestamp": "2026-11-17T17:50:00Z",
+    "fields": {
+      "temperature": -0.2,
+      "windspeed": 12.7
+    }
+  }
+```
 
 ---
 
