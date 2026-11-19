@@ -27,6 +27,7 @@ public class PollingScheduler {
     private boolean isRunning = false;
     private String currentFormat;
     private String currentFile;
+    private List<String> activeSources = new ArrayList<>();
 
     public PollingScheduler(DataSourceRegistry registry, StorageFactory storageFactory) {
         this.registry = registry;
@@ -42,6 +43,7 @@ public class PollingScheduler {
         this.executor = Executors.newScheduledThreadPool(config.getN());
         this.currentFormat = config.getFormat();
         this.currentFile = config.getFile();
+        this.activeSources = new ArrayList<>(config.getSources().keySet());
 
         DataStorage storage = storageFactory.create(
                 config.getFormat(),
@@ -85,6 +87,7 @@ public class PollingScheduler {
             }
         }
         this.isRunning = false;
+        this.activeSources.clear();
         log.info("Polling stopped.");
     }
 
@@ -98,6 +101,10 @@ public class PollingScheduler {
 
     public String getCurrentFile() {
         return currentFile;
+    }
+
+    public List<String> getActiveSources() {
+        return List.copyOf(activeSources);
     }
 
     @PreDestroy

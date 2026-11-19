@@ -14,10 +14,13 @@ class DtoTest {
 
     @Test
     void testPollingStatusResponse() {
-        PollingStatusResponse res = new PollingStatusResponse(true, 3, 10);
+        List<String> activeSources = List.of("open-meteo", "world-bank");
+        PollingStatusResponse res = new PollingStatusResponse(true, 3, 10, activeSources);
         assertTrue(res.isRunning());
         assertEquals(3, res.getN());
         assertEquals(10, res.getT());
+        assertEquals(2, res.getActiveSources().size());
+        assertEquals("open-meteo", res.getActiveSources().get(0));
     }
 
     @Test

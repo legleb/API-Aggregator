@@ -7,6 +7,7 @@ import com.example.aggregator.scheduling.PollingConfig;
 import com.example.aggregator.scheduling.PollingScheduler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,22 +29,7 @@ public class PollingController {
         }
 
         try {
-            PollingConfig configToRun = new PollingConfig();
-            if (request == null) {
-                configToRun.setN(defaultConfig.getN());
-                configToRun.setT(defaultConfig.getT());
-                configToRun.setFormat(defaultConfig.getFormat());
-                configToRun.setFile(defaultConfig.getFile());
-                configToRun.setMode(defaultConfig.getMode()); // <--- ДОБАВИЛИ
-                configToRun.setSources(defaultConfig.getSources());
-            } else {
-                configToRun.setN(request.getN() != null ? request.getN() : defaultConfig.getN());
-                configToRun.setT(request.getT() != null ? request.getT() : defaultConfig.getT());
-                configToRun.setFormat(request.getFormat() != null ? request.getFormat() : defaultConfig.getFormat());
-                configToRun.setFile(request.getFile() != null ? request.getFile() : defaultConfig.getFile());
-                configToRun.setMode(request.getMode() != null ? request.getMode() : defaultConfig.getMode()); // <--- ДОБАВИЛИ
-                configToRun.setSources(request.getSources() != null ? request.getSources() : defaultConfig.getSources());
-            }
+            PollingConfig configToRun = createConfigToRun(request);
             if (configToRun.getN() <= 0) {
                 throw new IllegalArgumentException("n must be positive");
             }
@@ -55,6 +41,27 @@ public class PollingController {
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: " + e.getMessage()));
         }
+    }
+
+    @NonNull
+    private PollingConfig createConfigToRun(StartPollingRequest request) {
+        PollingConfig configToRun = new PollingConfig();
+        if (request == null) {
+            configToRun.setN(defaultConfig.getN());
+            configToRun.setT(defaultConfig.getT());
+            configToRun.setFormat(defaultConfig.getFormat());
+            configToRun.setFile(defaultConfig.getFile());
+            configToRun.setMode(defaultConfig.getMode());
+            configToRun.setSources(defaultConfig.getSources());
+        } else {
+            configToRun.setN(request.getN() != null ? request.getN() : defaultConfig.getN());
+            configToRun.setT(request.getT() != null ? request.getT() : defaultConfig.getT());
+            configToRun.setFormat(request.getFormat() != null ? request.getFormat() : defaultConfig.getFormat());
+            configToRun.setFile(request.getFile() != null ? request.getFile() : defaultConfig.getFile());
+            configToRun.setMode(request.getMode() != null ? request.getMode() : defaultConfig.getMode());
+            configToRun.setSources(request.getSources() != null ? request.getSources() : defaultConfig.getSources());
+        }
+        return configToRun;
     }
 
     @PostMapping("/stop")
@@ -71,7 +78,8 @@ public class PollingController {
         return ResponseEntity.ok(new PollingStatusResponse(
                 scheduler.isRunning(),
                 defaultConfig.getN(),
-                defaultConfig.getT()
+                defaultConfig.getT(),
+                scheduler.getActiveSources()
         ));
     }
 }

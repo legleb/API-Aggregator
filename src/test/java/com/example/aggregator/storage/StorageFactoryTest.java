@@ -12,12 +12,12 @@ class StorageFactoryTest {
 
     @Test
     void testCreateJson() {
-        assertTrue(factory.create("json", Path.of("t")) instanceof JsonDataStorage);
+        assertInstanceOf(JsonDataStorage.class, factory.create("json", Path.of("t")));
     }
 
     @Test
     void testCreateCsv() {
-        assertTrue(factory.create("csv", Path.of("t")) instanceof CsvDataStorage);
+        assertInstanceOf(CsvDataStorage.class, factory.create("csv", Path.of("t")));
     }
 
     @Test

@@ -50,8 +50,8 @@ class AggregatedDataTest {
         assertEquals(d1, d2);
         assertEquals(d1.hashCode(), d2.hashCode());
         assertNotEquals(d1, d3);
-        assertNotEquals(d1, null);
-        assertNotEquals(d1, new Object());
+        assertNotEquals(null, d1);
+        assertNotEquals(new Object(), d1);
     }
 
     @Test

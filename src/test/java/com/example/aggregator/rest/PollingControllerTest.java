@@ -26,6 +26,8 @@ class PollingControllerTest {
     @Test
     void testStartSuccess() throws Exception {
         when(scheduler.isRunning()).thenReturn(false);
+        when(defaultConfig.getN()).thenReturn(3);
+        when(defaultConfig.getT()).thenReturn(10);
         mockMvc.perform(post("/polling/start")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -66,7 +68,8 @@ class PollingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.running").value(true))
                 .andExpect(jsonPath("$.n").value(3))
-                .andExpect(jsonPath("$.t").value(10));
+                .andExpect(jsonPath("$.t").value(10))
+                .andExpect(jsonPath("$.activeSources").isArray());
     }
 
     @Test
