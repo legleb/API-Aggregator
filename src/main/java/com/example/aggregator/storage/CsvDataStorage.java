@@ -33,7 +33,11 @@ public class CsvDataStorage implements DataStorage {
 
     @Override
     public synchronized void write(List<AggregatedData> data, WriteMode mode) {
-        if (data == null || data.isEmpty()) {
+        if (data == null) {
+            data = List.of();
+        }
+
+        if (data.isEmpty() && mode == WriteMode.APPEND) {
             return;
         }
 
@@ -41,7 +45,7 @@ public class CsvDataStorage implements DataStorage {
             Files.createDirectories(file.toAbsolutePath().getParent());
             boolean writeHeader = mode == WriteMode.CREATE || !Files.exists(file) || Files.size(file) == 0;
 
-            StandardOpenOption[] options = (mode == WriteMode.CREATE)? new StandardOpenOption[]{
+            StandardOpenOption[] options = (mode == WriteMode.CREATE) ? new StandardOpenOption[]{
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE}
                     : new StandardOpenOption[]{
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE};

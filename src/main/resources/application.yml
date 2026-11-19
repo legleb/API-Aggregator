@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+aggregator:
+  n: 3
+  t: 10
+  format: csv
+  file: data/data.csv
+  mode: create
+
+  sources:
+    open-meteo:
+      - latitude: "52.52"
+        longitude: "13.41"
+      - latitude: "55.75"
+        longitude: "37.61"
+    open-library:
+      - q: "java"
+        limit: "1"
+      - q: "python"
+        limit: "1"
+    world-bank:
+      - code: "USA"
+      - code: "DEU"

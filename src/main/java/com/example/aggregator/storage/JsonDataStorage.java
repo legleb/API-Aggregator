@@ -23,6 +23,10 @@ public class JsonDataStorage implements DataStorage {
     @Override
     public synchronized void write(List<AggregatedData> data, WriteMode mode) {
         if (data == null || data.isEmpty()) {
+            data = List.of();
+        }
+
+        if (data.isEmpty() && mode == WriteMode.APPEND) {
             return;
         }
 
