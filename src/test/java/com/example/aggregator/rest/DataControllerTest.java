@@ -5,6 +5,8 @@ import com.example.aggregator.scheduling.PollingScheduler;
 import com.example.aggregator.storage.DataStorage;
 import com.example.aggregator.storage.StorageFactory;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,28 +36,19 @@ class DataControllerTest {
     @MockBean
     private StorageFactory storageFactory;
 
-    @Test
-    void testGetData() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/data",
+            "/data?source=open-meteo"
+    })
+    void testGetDataWithAndWithoutFilter(String url) throws Exception {
         DataStorage storageMock = mock(DataStorage.class);
         when(storageMock.read()).thenReturn(List.of());
         when(storageMock.readBySource(anyString())).thenReturn(List.of());
         when(storageFactory.create(anyString(), any())).thenReturn(storageMock);
         when(scheduler.getCurrentFormat()).thenReturn("json");
         when(scheduler.getCurrentFile()).thenReturn("src/test/resources/test-data.json");
-        mockMvc.perform(get("/data")).andExpect(status().isOk());
-    }
-
-    @Test
-    void testGetDataWithSourceFilter() throws Exception {
-        DataStorage storageMock = mock(DataStorage.class);
-        when(storageMock.read()).thenReturn(List.of());
-        when(storageMock.readBySource(anyString())).thenReturn(List.of());
-
-        when(storageFactory.create(anyString(), any())).thenReturn(storageMock);
-        when(scheduler.getCurrentFormat()).thenReturn("json");
-        when(scheduler.getCurrentFile()).thenReturn("src/test/resources/test-data.json");
-
-        mockMvc.perform(get("/data?source=open-meteo")).andExpect(status().isOk());
+        mockMvc.perform(get(url)).andExpect(status().isOk());
     }
 
     @Test
